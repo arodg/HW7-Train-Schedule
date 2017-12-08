@@ -18,7 +18,6 @@ var config = {
 firebase.initializeApp(config);
 
 var database = firebase.database();
-console.log(firebase);
 
 
 // 2. Capture new train data
@@ -56,26 +55,36 @@ database.ref().on("child_added", function(childSnapshot, prevChildKey) {
   var destination = childSnapshot.val().dest;
   var firstTrain = childSnapshot.val().time;
   var frequency = childSnapshot.val().freq;
+  
 
-  // 6. Calculate Next Arrival and Minutes Away, based on class exercise #21, Train Predictions
+  // 6. Calculate Next Arrival and Minutes Away. Following calculations are based on class exercise #21, Train Predictions
 
-    // First train time (pushed back 1 year to make sure it comes before current time)
-    var firstTrainConverted = moment(firstTrain, "hh:mm").subtract(1, "years");
+    // Convert string to time format
+    var firstTrainTime = moment.unix(firstTrain).format("HH:mm");
+    console.log("First train time is " + firstTrainTime);
+
+    // Note frequency
+    console.log("Frequency is " + frequency + " minutes");
+
+    // Push back first train time 1 year to ensure it is before current time
+    var firstTrainConverted = moment(firstTrainTime, "HH:mm").subtract(1, "years");
     
     // Current time
     var currentTime = moment();
 
-    // Difference between the times
+    // Difference in minutes between current time and first train time
     var diffTime = moment().diff(moment(firstTrainConverted), "minutes");
 
-    // Time apart (remainder)
+    // Remainder
     var remainder = diffTime % frequency;
-
+    
     // Minutes until next train
     var minutesAway = frequency - remainder;
+    console.log("Minutes until next train is " + minutesAway);
 
     // Time of next arrival
     var nextArrival = moment().add(minutesAway, "minutes").format("hh:mm");
+    console.log("Time of next train is " + nextArrival);
     
 
     $(".table > tbody").append("<tr><td>" + trainName + "</td><td>" + destination + 
